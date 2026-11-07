@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Biomass chain grate furnace</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--page:#ffffff;--text-primary:#1f1e1d;--text-secondary:#5f5e5a;--text-muted:#888780;--t:#5f5e5a;
+--surface-1:#f3f2ec;--border:rgba(0,0,0,.15);--border-strong:rgba(0,0,0,.35);--radius:8px;
+--bg-success:#eaf3de;--text-success:#3b6d11;--bg-warning:#faeeda;--text-warning:#854f0b;--bg-danger:#fcebeb;--text-danger:#a32d2d}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--page:#1f1e1d;--text-primary:#f1efe8;--text-secondary:#c2c0b6;--text-muted:#9c9a92;--t:#b4b2a9;--surface-1:#2c2c2a;--border:rgba(255,255,255,.18);--border-strong:rgba(255,255,255,.4);--bg-success:#27500a;--text-success:#c0dd97;--bg-warning:#633806;--text-warning:#fac775;--bg-danger:#791f1f;--text-danger:#f7c1c1}}
+:root[data-theme="dark"]{--page:#1f1e1d;--text-primary:#f1efe8;--text-secondary:#c2c0b6;--text-muted:#9c9a92;--t:#b4b2a9;--surface-1:#2c2c2a;--border:rgba(255,255,255,.18);--border-strong:rgba(255,255,255,.4);--bg-success:#27500a;--text-success:#c0dd97;--bg-warning:#633806;--text-warning:#fac775;--bg-danger:#791f1f;--text-danger:#f7c1c1}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--page);color:var(--text-primary);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:760px;margin:0 auto;padding:12px 16px 32px}
+h1{font-size:20px;font-weight:500;margin:0 0 2px}
+.sub{font-size:13px;color:var(--text-secondary);margin:0 0 12px}
+.h2{font-size:14px;font-weight:500;margin:20px 0 4px}
+svg text{font-family:inherit}
+.ts{font-size:12px;fill:var(--text-secondary)}
+.th{font-size:14px;font-weight:500;fill:var(--text-primary)}
+.arr{stroke:var(--t);stroke-width:1.5;fill:none}
+@keyframes chain{to{stroke-dashoffset:-11}}
+@keyframes fall{0%{transform:translateY(0);opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:translateY(var(--fy,40px));opacity:0}}
+@keyframes fl{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.78)}}
+@keyframes ashfall{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(95px);opacity:0}}
+@media (prefers-reduced-motion: no-preference){
+.chain{animation:chain var(--cd,1s) linear infinite}
+.air{animation:chain .7s linear infinite}
+.gas{animation:chain 1.2s linear infinite}
+.fall{animation:fall var(--fd,1.6s) ease-in infinite}
+.ashd{animation:ashfall var(--fd,1.6s) ease-in infinite}
+.flame{transform-box:fill-box;transform-origin:50% 100%;animation:fl .7s ease-in-out infinite}
+.flame:nth-child(even){animation-duration:.9s}
+}
+.flwrap{transform-box:fill-box;transform-origin:50% 100%;transition:transform .3s}
+.ctl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);margin-top:8px}
+.ctl span:first-child{min-width:104px}
+input[type=range]{flex:1;accent-color:#378add}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px}
+.m{background:var(--surface-1);border-radius:var(--radius);padding:8px 10px}
+.m .l{font-size:12px;color:var(--text-secondary)}
+.m .v{font-size:17px;font-weight:500}
+.m .s{font-size:11px;color:var(--text-muted)}
+.note{font-size:13px;color:var(--text-secondary);margin:6px 0 0}
+.small{font-size:11px;color:var(--text-muted);margin:6px 0 0}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:500}
+.chip.g{background:var(--bg-success);color:var(--text-success)}
+.chip.a{background:var(--bg-warning);color:var(--text-warning)}
+.chip.r{background:var(--bg-danger);color:var(--text-danger)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:5px 6px;text-align:left;border-bottom:0.5px solid var(--border)}
+th{font-weight:500;color:var(--text-secondary)}
+tr.cur td{font-weight:500;background:var(--surface-1)}
+ol{margin:6px 0 0;padding-left:20px;font-size:13px;color:var(--text-secondary)}
+li{margin-top:4px}
+.zoombar{position:sticky;top:0;z-index:10;display:flex;justify-content:flex-end;padding:6px 10px 0;pointer-events:none}
+.zpill{pointer-events:auto;display:flex;align-items:center;gap:4px;background:var(--surface-1);border:0.5px solid var(--border-strong);border-radius:999px;padding:2px 8px;color:var(--text-secondary);font-size:10px}
+.zpill button{width:19px;height:19px;border-radius:50%;border:0.5px solid var(--border-strong);background:var(--page);color:var(--text-primary);font-size:13px;line-height:1;cursor:pointer;padding:0}
+.zpill input{width:88px;flex:none}
+#zo{min-width:28px;text-align:right}
+.tw{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="zoombar"><div class="zpill"><svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><button type="button" id="zm" aria-label="Zoom out">&minus;</button><input type="range" id="zr" min="50" max="120" step="5" value="90" aria-label="Page zoom"><button type="button" id="zp" aria-label="Zoom in">+</button><span id="zo">90%</span></div></div>
+<div class="page">
+<h1>Biomass chain grate furnace</h1>
+<p class="sub">Biomass drops from the hopper onto the moving chain, burns in four zones, and leaves as ash. Calibrated on plant data. Move the sliders to see air flow, energy use, temperatures and ash.</p>
+<svg id="furnace" width="100%" viewBox="0 0 680 420" role="img" style="display:block;max-width:80%;margin:0 auto">
+<title>Biomass burning on a chain grate furnace with estimated temperatures</title>
+<desc>Biomass falls from a hopper onto a moving chain grate, dries, burns volatile gas, burns as char, and leaves as ash and slag. Primary air comes from two blowers. Estimated temperature is shown under each zone.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<rect x="150" y="80" width="500" height="160" rx="4" fill="none" stroke="var(--t)" stroke-width="0.5" stroke-dasharray="4 4"/>
+<text class="ts" x="160" y="72">Furnace chamber</text>
+<line x1="100" y1="16" x2="100" y2="38" class="arr" marker-end="url(#arrow)"/>
+<text class="th" x="100" y="11" text-anchor="middle">Biomass in</text>
+<polygon id="hop" points="50,42 150,42 150,130 130,190 80,190 50,130" fill="#9C7A4B" fill-opacity="0.45" stroke="var(--t)" stroke-width="1"/>
+<text class="th" x="100" y="100" text-anchor="middle">Hopper</text>
+<rect class="fall" x="92" y="150" width="8" height="6" rx="1" fill="#6B4A2A" style="animation-delay:0s"/>
+<rect class="fall" x="104" y="146" width="8" height="6" rx="1" fill="#6B4A2A" style="animation-delay:.5s"/>
+<rect class="fall" x="114" y="152" width="8" height="6" rx="1" fill="#6B4A2A" style="animation-delay:1s"/>
+<polygon id="zdry" points="85,190 205,191 205,240 85,240" fill="#9C7A4B"/>
+<polygon id="zvol" points="205,191 345,200 345,240 205,240" fill="#5C3A1E"/>
+<polygon id="zchar" points="345,200 475,212 475,240 345,240" fill="#C2410C"/>
+<polygon id="zash" points="475,212 560,222 615,232 615,240 475,240" fill="#A8A39A"/>
+<text id="t-th" x="145" y="228" text-anchor="middle" font-size="12" font-weight="500" fill="#ffffff">Bed 23 cm</text>
+<g id="ft2"><g class="flwrap" id="fl2">
+<path class="flame" d="M215 197Q219 171 226 151Q233 171 237 197Z" fill="#E85D24"/>
+<path class="flame" d="M243 198Q247 169 254 147Q261 169 265 198Z" fill="#F2A623"/>
+<path class="flame" d="M271 198Q275 173 282 155Q289 173 293 198Z" fill="#E85D24"/>
+<path class="flame" d="M299 199Q303 169 310 149Q317 169 321 199Z" fill="#F2A623"/>
+<path class="flame" d="M324 200Q327 180 333 164Q339 180 342 200Z" fill="#E85D24"/>
+</g></g>
+<g id="ft3"><g class="flwrap" id="fl3">
+<path class="flame" d="M355 203Q359 190 365 176Q371 190 375 203Z" fill="#F2A623"/>
+<path class="flame" d="M382 206Q386 188 392 172Q398 188 402 206Z" fill="#E85D24"/>
+<path class="flame" d="M409 209Q413 192 419 180Q425 192 429 209Z" fill="#F2A623"/>
+<path class="flame" d="M436 211Q439 198 445 188Q451 198 454 211Z" fill="#E85D24"/>
+</g></g>
+<path class="gas" d="M345 125H610V48" fill="none" stroke="var(--t)" stroke-width="1.2" stroke-dasharray="5 6" marker-end="url(#arrow)"/>
+<text class="th" id="t-gas" x="590" y="34" text-anchor="middle">Flue gas</text>
+<path class="chain" d="M75 242H610A28 28 0 0 1 610 298H75A28 28 0 0 1 75 242Z" fill="none" stroke="var(--t)" stroke-width="4" stroke-dasharray="7 4" opacity="0.85"/>
+<circle cx="75" cy="270" r="7" fill="none" stroke="var(--t)" stroke-width="1"/>
+<circle cx="610" cy="270" r="7" fill="none" stroke="var(--t)" stroke-width="1"/>
+<polygon points="85,248 195,248 149,292 131,292" fill="none" stroke="var(--t)" stroke-width="0.5"/>
+<polygon points="210,248 320,248 274,292 256,292" fill="none" stroke="var(--t)" stroke-width="0.5"/>
+<polygon points="335,248 445,248 399,292 381,292" fill="none" stroke="var(--t)" stroke-width="0.5"/>
+<polygon points="460,248 570,248 524,292 506,292" fill="none" stroke="var(--t)" stroke-width="0.5"/>
+<g id="airs" stroke="#378ADD" stroke-width="2" fill="none">
+<line class="air" x1="140" y1="332" x2="140" y2="252" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<line class="air" x1="265" y1="332" x2="265" y2="252" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<line class="air" x1="390" y1="332" x2="390" y2="252" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<line class="air" x1="515" y1="332" x2="515" y2="252" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+</g>
+<text class="ts" x="10" y="326">Primary air in</text>
+<text class="th" id="t-air" x="10" y="342" style="font-size:12px">19,000 m³/h</text>
+<text class="ts" id="t-bl" x="10" y="358">2 blowers, 40 Hz</text>
+<text class="ts" id="t-bp" x="10" y="374">30 kW each</text>
+<rect class="ashd" x="643" y="250" width="6" height="6" rx="1" fill="#A8A39A" style="animation-delay:0s"/>
+<rect class="ashd" x="655" y="246" width="6" height="6" rx="1" fill="#A8A39A" style="animation-delay:.55s"/>
+<rect class="ashd" x="665" y="252" width="6" height="6" rx="1" fill="#A8A39A" style="animation-delay:1.1s"/>
+<rect x="628" y="350" width="48" height="36" rx="3" fill="none" stroke="var(--t)" stroke-width="1"/>
+<polygon id="pile" points="632,386 672,386 672,368 650,362 632,370" fill="#A8A39A"/>
+<text class="th" x="650" y="406" text-anchor="middle">Ash and slag out</text>
+<text class="ts" x="140" y="356" text-anchor="middle">Drying</text>
+<text class="ts" x="265" y="356" text-anchor="middle">Volatile burning</text>
+<text class="ts" x="390" y="356" text-anchor="middle">Char burning</text>
+<text class="ts" x="515" y="356" text-anchor="middle">Burnout</text>
+<text class="th" id="t-dry" x="140" y="374" text-anchor="middle">220 °C</text>
+<text class="th" id="t-vol" x="265" y="374" text-anchor="middle">760 °C</text>
+<text class="th" id="t-char" x="390" y="374" text-anchor="middle">1010 °C</text>
+<text class="th" id="t-ash" x="515" y="374" text-anchor="middle">480 °C</text>
+</svg>
+
+<div class="ctl"><span>Chain motor</span><input type="range" id="sp" min="12" max="46" step="1" value="45" oninput="update()" aria-label="Chain motor inverter frequency"><span id="sp-o" style="min-width:110px;text-align:right">45 Hz</span></div>
+<div class="ctl"><span>Blower</span><input type="range" id="ai" min="20" max="50" step="1" value="40" oninput="update()" aria-label="Blower inverter frequency"><span id="ai-o" style="min-width:110px;text-align:right">40 Hz, 80% air</span></div>
+<div class="ctl"><span>Bed thickness</span><input type="range" id="bt" min="15" max="25" step="1" value="23" oninput="update()" aria-label="Bed thickness"><span id="bt-o" style="min-width:110px;text-align:right">23 cm</span></div>
+<div class="ctl"><span>Biomass moisture</span><input type="range" id="mo" min="4" max="25" step="0.1" value="4.3" oninput="update()" aria-label="Biomass moisture"><span id="mo-o" style="min-width:110px;text-align:right">4.3%</span></div>
+
+<div class="cards">
+<div class="m"><div class="l">Air intake</div><div class="v" id="c-air">19,000 m³/h</div><div class="s" id="c-airs"></div></div>
+<div class="m"><div class="l">Blower power</div><div class="v" id="c-bl">60 kW</div><div class="s" id="c-bls"></div></div>
+<div class="m"><div class="l">Biomass feed</div><div class="v" id="c-fuel">1,891 kg/h</div><div class="s" id="c-fuels"></div></div>
+<div class="m"><div class="l">Heat input</div><div class="v" id="c-heat">8.8 MW</div><div class="s" id="c-heats"></div></div>
+<div class="m"><div class="l">Energy per day (electricity)</div><div class="v" id="c-en">0</div><div class="s" id="c-ens"></div></div>
+<div class="m"><div class="l">Per tonne of powder</div><div class="v" id="c-sp">0</div><div class="s" id="c-sps"></div></div>
+<div class="m"><div class="l">Heat per kg of powder</div><div class="v" id="c-kk">0</div><div class="s" id="c-kks"></div></div>
+<div class="m"><div class="l">Flue gas</div><div class="v" id="c-tf">1034 °C</div><div class="s" id="c-tfs"></div></div>
+<div class="m"><div class="l">Hot air, tower top</div><div class="v" id="c-tt">678 °C</div><div class="s" id="c-tts"></div></div>
+<div class="m"><div class="l">Unburned carbon</div><div class="v" id="c-loi">6%</div><div class="s" id="c-lois">in ash</div></div>
+<div class="m"><div class="l">Ash output</div><div class="v" id="c-ash">100%</div><div class="s">relative to base</div></div>
+</div>
+<p id="n1" class="note"></p><p id="n2" class="note"></p><p id="n3" class="note"></p><p id="n4" class="note"></p>
+
+<div class="h2">Energy and stability</div>
+<div id="stab" style="font-size:13px"></div>
+<div style="font-size:13px;font-weight:500;margin-top:10px">Recommendations</div>
+<ol id="rec"></ol>
+<div style="font-size:13px;font-weight:500;margin-top:12px">What if</div>
+<div class="tw"><table><thead><tr><th>Case</th><th>Biomass (kg/h)</th><th>kcal/kg powder</th><th>Biomass saving (kg/day)</th><th>Electricity (kWh/day)</th><th>Saving (kWh/day)</th><th>Flue gas</th><th>Lambda</th></tr></thead><tbody id="wi"></tbody></table></div>
+<p class="small">Moisture case: biomass needed for the same heat. Electricity is the blowers plus the chain motor. In the plant data a lower chain Hz uses less biomass per tonne of powder.</p>
+
+<div class="h2">Calibration with plant data</div>
+<div class="tw"><table><thead><tr><th>Case (blower, chain)</th><th>Flue gas model</th><th>Plant</th><th>Diff</th><th>Tower top model</th><th>Plant</th><th>Diff</th></tr></thead><tbody id="cal"></tbody></table></div>
+<div style="font-size:13px;font-weight:500;margin-top:10px">Biomass per tonne of powder against the chain Hz</div>
+<div class="tw"><table><thead><tr><th>Chain Hz</th><th>kg biomass per tonne</th><th>kcal/kg powder</th><th>Biomass (kg/h)</th><th>Heat (kcal/h)</th></tr></thead><tbody id="cal2"></tbody></table></div>
+<p id="calnote" class="small"></p>
+<p id="assume" class="small"></p>
+<p class="small">All values come from an illustrative model calibrated on the plant data, not measured values. To improve it, please send: the blower datasheet (flow and pressure), the biomass feeder rate and how it follows the chain Hz, the chain motor current, and the oxygen in the flue gas.</p>
+</div>
+<script>
+/* Assumed constants: replace with real values */
+var K={nBl:2,kwSh:55,rpm:2970,effM:0.94,cos:0.9,V:380,f0:50,
+dpRated:12000,effFan:0.72,Tamb:30,
+lhvKcal:4000,mRef:4.3,F0:1891,chain0:35.6,bed0:23,kgtLo:87,kgtHi:131,chLo:12,chHi:46,
+stoich:0.26,cp:1.15,
+chainKw:5.5,chainLoad:0.6,chainEff:0.88,
+powderSpec:24500,powderM:7.4,slipS:0.643,
+Tf0:1034,Tt0:678,sdF:12,sdT:6.4,lamLo:1.4,lamHi:2.2};
+function kgtBase(fc){return K.kgtLo+(K.kgtHi-K.kgtLo)*(Math.min(K.chHi,Math.max(K.chLo,fc))-K.chLo)/(K.chHi-K.chLo);}
+K.powder=K.F0/kgtBase(K.chain0)*1000;
+var QR=K.effFan*K.kwSh*1000/K.dpRated*3600,NF=273.15/(273.15+K.Tamb),RHO=1.293*NF,LHV0=K.lhvKcal*4.1868/1000;
+var LHVd=(LHV0+2.44*K.mRef/100)/(1-K.mRef/100);
+function lhv(M){var m=M/100;return LHVd*(1-m)-2.44*m;}
+var ETA=1;
+function Tphys(F,M,fb){var lh=lhv(M),Qt=QR*fb/K.f0*K.nBl,lam=Qt*NF/(F*K.stoich*lh),ec=Math.min(1,lam),ma=Qt*RHO;return K.Tamb+ETA*F*lh*1000*ec/((F+ma)*K.cp);}
+ETA=(K.Tf0-K.Tamb)/(Tphys(K.F0,K.mRef,40)-K.Tamb);
+var XM=(K.Tt0-K.Tamb)/(K.Tf0-K.Tamb);
+function $(id){return document.getElementById(id);}
+function r10(x){return Math.round(x/10)*10;}
+function fmt(x){return Math.round(x).toLocaleString('en-US');}
+function mix(c1,c2,t){t=Math.max(0,Math.min(1,t));var o='#';for(var i=0;i<3;i++){var a=parseInt(c1.substr(1+2*i,2),16),b=parseInt(c2.substr(1+2*i,2),16);var v=Math.round(a+(b-a)*t).toString(16);o+=(v.length<2?'0':'')+v;}return o;}
+function run(fb,fc,bed,M,Fo){
+var lh=lhv(M),Qb=QR*fb/K.f0,Qt=Qb*K.nBl,An=Qt*NF;
+var kg0=kgtBase(fc)*(bed/K.bed0)*(1+0.25*(fb-40)/40),F=(Fo!==undefined)?Fo:kg0*K.powder/1000;
+var lam=An/(F*K.stoich*lh);
+if(Fo===undefined&&lam<1.5){F=F*(1+0.08*(1.5-lam));lam=An/(F*K.stoich*lh);}
+var o2=Math.max(0,21*(1-1/lam)),kgt=F/(K.powder/1000),kcalh=F*lh*1000/4.1868,kcalkg=kcalh/K.powder;
+var Pel1=K.kwSh/K.effM*Math.pow(fb/K.f0,3),Pel=Pel1*K.nBl;
+var Vv=K.V*Math.min(fb,K.f0)/K.f0,I1=Pel1*1000/(Math.sqrt(3)*Vv*K.cos);
+var Pch=K.chainKw*K.chainLoad*(fc/K.f0)/K.chainEff;
+var heat=F*lh,th=heat/3.6;
+var bc=Math.min(42,Math.max(38,fb));
+var Fp=K.F0*(bed/K.bed0),d=Tphys(Fp,M,fb)-Tphys(K.F0,K.mRef,bc);
+var Tb=944.6+2.66*bc-0.472*fc,Tf=Tb+d;if(Tf>1250)Tf=1250+100*Math.tanh((Tf-1250)/100);var de=Tf-Tb,Tt=654.8+0.919*bc-0.385*fc+XM*de;
+var loi=6+1.0*(bed-K.bed0)+0.15*(fc-K.chain0)+8*Math.max(0,1.5-lam)+0.2*(M-K.mRef);
+loi=Math.max(2,Math.min(35,loi));
+var ash=F/K.F0*(1+(loi-6)/100)*100;
+var kwh=(Pel+Pch)*24;
+return {fb:fb,fc:fc,bed:bed,M:M,lh:lh,F:F,Qb:Qb,Qt:Qt,An:An,lam:lam,o2:o2,Pel1:Pel1,Pel:Pel,I1:I1,kva:Pel/K.cos,Pch:Pch,heat:heat,th:th,Tf:Tf,Tt:Tt,d:d,loi:loi,ash:ash,kwh:kwh,rpm:K.rpm*fb/K.f0,kgt:kgt,kcalh:kcalh,kcalkg:kcalkg};
+}
+var cmp=[['40 Hz, 45 Hz',40,45,1026.7,674.1],['40 Hz, 15 Hz',40,15,1042.1,685.8],['38 Hz, 45 Hz',38,45,1027.2,672.7],['42 Hz, 45 Hz',42,45,1034.9,674.1],['Plant mean (40 Hz, 35.6 Hz)',40,35.6,1034.0,677.8]];
+function buildCal(){
+var h='';cmp.forEach(function(c){var r=run(c[1],c[2],K.bed0,K.mRef);h+='<tr><td>'+c[0]+'</td><td>'+Math.round(r.Tf)+' °C</td><td>'+Math.round(c[3])+' °C</td><td>'+(r.Tf-c[3]>=0?'+':'\u2212')+Math.abs(r.Tf-c[3]).toFixed(1)+'</td><td>'+Math.round(r.Tt)+' °C</td><td>'+Math.round(c[4])+' °C</td><td>'+(r.Tt-c[4]>=0?'+':'\u2212')+Math.abs(r.Tt-c[4]).toFixed(1)+'</td></tr>';});
+var h2='';[12,20,28,35.6,45,46].forEach(function(c){var r=run(40,c,K.bed0,K.mRef);h2+='<tr><td>'+c+'</td><td>'+r.kgt.toFixed(0)+'</td><td>'+Math.round(r.kcalkg)+'</td><td>'+fmt(r.F)+'</td><td>'+fmt(r.kcalh)+'</td></tr>';});
+var r0=run(40,K.chain0,K.bed0,K.mRef),evap=K.powder*(1-K.powderM/100)/K.slipS*(1-K.slipS)-K.powder*K.powderM/100,hev=evap*2620/4.1868;
+$('cal').innerHTML=h;$('cal2').innerHTML=h2;
+$('calnote').innerHTML='Biomass per tonne of powder is calibrated to the plant range of '+K.kgtLo+' to '+K.kgtHi+' kg/t ('+Math.round(K.kgtLo*K.lhvKcal/1000)+' to '+Math.round(K.kgtHi*K.lhvKcal/1000)+' kcal/kg powder at 4000 kcal/kg). It rises linearly with the chain Hz: '+K.kgtLo+' at '+K.chLo+' Hz and '+K.kgtHi+' at '+K.chHi+' Hz. With the average biomass of '+fmt(K.F0)+' kg/h (28 daily averages, moisture 3.5 to 5.0%, mean 4.3%) at the average chain Hz of '+K.chain0+', this implies about '+(K.powder/1000).toFixed(1)+' t/h of powder for this furnace. That is lower than the 24.5 t/h spray dryer capacity, which would need about '+fmt(kgtBase(K.chain0)*K.powderSpec/1000)+' kg/h. At '+(K.powder/1000).toFixed(1)+' t/h the water evaporation needs about '+(hev/1e6).toFixed(1)+' million kcal/h ('+Math.round(hev/r0.kcalh*100)+'% of the heat input), which is plausible. Please confirm the powder rate. One biomass value (2552.9 kg/h) differs from the raw sheet (3552.9 kg/h).<br>Temperatures: 112 readings. Regression: tower top = 655 + 0.92 x blower Hz \u2212 0.385 x chain Hz (R\u00b2 0.66); flue gas = 945 + 2.66 x blower Hz \u2212 0.47 x chain Hz (R\u00b2 0.34). The blowers always ran at 38, 40 or 42 Hz and the bed was always 23 cm, so effects outside these come from physics, not data. The chain Hz sits mostly at its limits and the temperature at one reading is related to the chain Hz at the next (r = \u22120.35 flue gas, \u22120.40 tower), so it is partly a controller output. The extra biomass at a high chain Hz does not make the flue gas hotter in the data, so the model keeps the temperature on the data and shows the extra biomass as extra fuel use and unburned carbon.';
+$('assume').innerHTML='Assumptions: blower duty from the 55 kW motor with '+(K.dpRated/1000)+' kPa at 50 Hz and '+Math.round(K.effFan*100)+'% fan efficiency, which gives '+fmt(QR)+' m\u00b3/h per blower at 50 Hz (fan laws: flow ~ Hz, pressure ~ Hz\u00b2, power ~ Hz\u00b3); '+K.nBl+' blowers; '+K.V+' V; '+K.lhvKcal+' kcal/kg at '+K.mRef+'% moisture; stoichiometric air '+K.stoich+' Nm\u00b3/MJ; chain motor '+K.chainKw+' kW at '+Math.round(K.chainLoad*100)+'% load; powder rate '+fmt(K.powder)+' kg/h (implied). The flue gas at the anchor is tuned with a heat efficiency of '+Math.round(ETA*100)+'%.';
+}
+function stability(r){
+var z=Math.abs(r.Tf-K.Tf0)/K.sdF,lv='g',why=[];
+function up(x){if(x==='r')lv='r';else if(x==='a'&&lv!=='r')lv='a';}
+if(r.lam<1||r.lam>2.5){up('r');why.push('lambda '+r.lam.toFixed(2)+' is outside 1.0 to 2.5 and looks unrealistic');}
+else if(r.lam<K.lamLo||r.lam>K.lamHi){up('a');why.push('lambda '+r.lam.toFixed(2)+' is outside '+K.lamLo+' to '+K.lamHi);}
+if(z>3){up('r');why.push('flue gas is '+Math.round(Math.abs(r.Tf-K.Tf0))+' \u00b0C from the plant average');}
+else if(z>1.5){up('a');why.push('flue gas is '+Math.round(Math.abs(r.Tf-K.Tf0))+' \u00b0C from the plant average');}
+if(r.M>20){up('r');why.push('moisture above 20% risks flame-out');}else if(r.M>15){up('a');why.push('moisture above 15% slows ignition');}
+if(r.loi>15){up('r');why.push('unburned carbon above 15%');}else if(r.loi>10){up('a');why.push('unburned carbon above 10%');}
+return {lv:lv,why:why,z:z};
+}
+function recs(r){
+var R=[],lt=1.9;
+if(r.lam>2.0){var fbt=Math.max(20,r.fb*lt/r.lam),q=run(fbt,r.fc,r.bed,r.M,r.F);var s=(r.Pel-q.Pel);R.push([2,'Lower both blowers from '+r.fb+' to '+Math.round(fbt)+' Hz. Lambda goes to about '+q.lam.toFixed(1)+', the electricity falls by '+s.toFixed(1)+' kW ('+fmt(s*24)+' kWh/day), and the flue gas changes by '+(q.Tf-r.Tf>=0?'+':'\u2212')+Math.abs(q.Tf-r.Tf).toFixed(0)+' \u00b0C.']);}
+else if(r.lam<1.5){var fb2=Math.min(50,r.fb*1.6/r.lam),q2=run(fb2,r.fc,r.bed,r.M,r.F);R.push([3,'Raise the blowers from '+r.fb+' to about '+Math.round(fb2)+' Hz for lambda 1.6. It adds '+(q2.Pel-r.Pel).toFixed(1)+' kW but cuts unburned carbon and smoke.']);}
+if(r.M>8){var F8=r.F*r.lh/lhv(8);R.push([r.M>15?4:3,'Dry the biomass from '+r.M.toFixed(1)+'% to 8%. For the same heat it saves '+fmt(r.F-F8)+' kg/h ('+((r.F-F8)*24/1000).toFixed(1)+' t/day).']);}
+else{var F1=r.F*r.lh/lhv(r.M+1)-r.F;R.push([1,'The biomass is dry ('+r.M.toFixed(1)+'%), which is good for fuel use. Each extra point of moisture costs about '+fmt(F1)+' kg/h for the same heat. Watch dust and slag at this dryness.']);}
+var fcT=Math.max(K.chLo,r.fc-10),qc=run(r.fb,fcT,r.bed,r.M);
+if(r.fc>K.chLo+2){R.push([r.fc>=44?3:2,'Lower the chain from '+r.fc+' to '+fcT+' Hz. In the plant data the biomass per tonne of powder rises with the chain Hz, so this saves about '+(r.kgt-qc.kgt).toFixed(0)+' kg per tonne ('+Math.round(r.kcalkg-qc.kcalkg)+' kcal/kg powder, about '+fmt((r.F-qc.F)*24)+' kg/day), and the unburned carbon falls by about '+(r.loi-qc.loi).toFixed(1)+' points. Keep it steady instead of swinging between 12 and 46 Hz.']);}
+else R.push([1,'The chain is already near its lowest ('+r.fc+' Hz), which gives the lowest biomass per tonne. Keep it steady.']);
+if(Math.abs(r.bed-K.bed0)>=2){R.push([2,'Return the bed to '+K.bed0+' cm (the plant value). Each cm changes the biomass feed by about '+fmt(K.F0/K.bed0)+' kg/h and the heat release by about 4%.']);}
+if(r.loi>10)R.push([3,'Unburned carbon is '+r.loi.toFixed(0)+'%. Lower the chain Hz for a longer burn, keep lambda above '+K.lamLo+', or use a thinner bed.']);
+R.sort(function(a,b){return b[0]-a[0];});
+return R.slice(0,5);
+}
+function update(){
+var fc=+$('sp').value,fb=+$('ai').value,bed=+$('bt').value,M=+$('mo').value,f=$('furnace');
+$('sp-o').textContent=fc+' Hz';$('ai-o').textContent=fb+' Hz, '+Math.round(fb/K.f0*100)+'% air';$('bt-o').textContent=bed+' cm';$('mo-o').textContent=M.toFixed(1)+'%';
+var r=run(fb,fc,bed,M),airp=fb/K.f0*100;
+f.style.setProperty('--cd',(40/fc).toFixed(2)+'s');f.style.setProperty('--fd',(50/fc).toFixed(2)+'s');
+var kt=bed/K.bed0;function Y(h){return (240-h*kt).toFixed(1);}
+var xd=Math.min(313,Math.max(145,85+120*(1+0.9*(M-K.mRef)/20.7)));
+$('zdry').setAttribute('points','85,'+Y(50)+' '+xd.toFixed(1)+','+Y(49)+' '+xd.toFixed(1)+',240 85,240');
+$('zvol').setAttribute('points',xd.toFixed(1)+','+Y(49)+' 345,'+Y(40)+' 345,240 '+xd.toFixed(1)+',240');
+$('zchar').setAttribute('points','345,'+Y(40)+' 475,'+Y(28)+' 475,240 345,240');
+$('zash').setAttribute('points','475,'+Y(28)+' 560,'+Y(18)+' 615,'+Y(8)+' 615,240 475,240');
+var gy=240-50*kt;$('hop').setAttribute('points','50,42 150,42 150,130 130,'+gy.toFixed(1)+' 80,'+gy.toFixed(1)+' 50,130');
+f.style.setProperty('--fy',(gy-152).toFixed(0)+'px');$('t-th').textContent='Bed '+bed+' cm';
+$('ft2').setAttribute('transform','translate('+((xd-205)*0.6).toFixed(1)+','+(-(kt-1)*45).toFixed(1)+')');
+$('ft3').setAttribute('transform','translate(0,'+(-(kt-1)*34).toFixed(1)+')');
+var sf=(r.Tf-K.Tamb)/(K.Tf0-K.Tamb),dry=K.Tamb+190*sf,vol=K.Tamb+730*sf,chr=K.Tamb+980*sf,ash=K.Tamb+450*sf;
+$('t-dry').textContent=r10(dry)+' °C';$('t-vol').textContent=r10(vol)+' °C';$('t-char').textContent=r10(chr)+' °C';$('t-ash').textContent=r10(ash)+' °C';$('t-gas').textContent='Flue gas '+Math.round(r.Tf)+' °C';
+var ar=$('airs');ar.style.opacity=(0.25+0.75*Math.min(airp,100)/100).toFixed(2);ar.setAttribute('stroke-width',(1+airp/50).toFixed(1));
+var fs=(0.5+0.6*Math.min(airp,100)/100)*(0.7+0.3*Math.max(0.3,sf))*(0.7+0.3*kt)*(1.15-0.25*(fc-12)/34)*(1-0.45*Math.max(0,M-K.mRef)/20.7);
+var sc='scale('+Math.max(0.15,fs).toFixed(2)+')';$('fl2').style.transform=sc;$('fl3').style.transform=sc;
+$('zchar').setAttribute('fill',mix('#7A2A0C','#F0561A',(chr-850)/250));$('zvol').setAttribute('fill',mix('#4A2E18','#8A4A1E',(vol-600)/250));
+var ac=mix(mix('#8F8B84','#D9714A',(ash-400)/250),'#2B2A28',Math.min(0.7,r.loi/30));$('zash').setAttribute('fill',ac);$('pile').setAttribute('fill',ac);
+var sz=(3+3*Math.min(r.ash,200)/100).toFixed(1),ads=document.querySelectorAll('.ashd');for(var i=0;i<ads.length;i++){ads[i].setAttribute('width',sz);ads[i].setAttribute('height',sz);ads[i].setAttribute('fill',ac);}
+$('t-air').textContent=fmt(r.Qt)+' m³/h';$('t-bl').textContent=K.nBl+' blowers, '+fb+' Hz';$('t-bp').textContent=r.Pel1.toFixed(0)+' kW each';
+$('c-air').textContent=fmt(r.Qt)+' m³/h';$('c-airs').textContent=fmt(r.Qb)+' m³/h each, '+fmt(r.An)+' Nm³/h, '+Math.round(r.rpm)+' rpm';
+$('c-bl').textContent=r.Pel.toFixed(1)+' kW';$('c-bls').textContent=r.I1.toFixed(0)+' A each, '+r.kva.toFixed(0)+' kVA total';
+$('c-fuel').textContent=fmt(r.F)+' kg/h';$('c-fuels').textContent=fmt(r.lh*1000/4.1868)+' kcal/kg at '+M.toFixed(1)+'% moisture';
+$('c-heat').textContent=fmt(r.kcalh)+' kcal/h';$('c-heats').textContent=(r.kcalh*24/1e6).toFixed(1)+' million kcal/day';
+$('c-en').textContent=fmt(r.kwh)+' kWh';$('c-ens').textContent='electricity: blowers '+fmt(r.Pel*24)+', chain '+fmt(r.Pch*24);
+var kgt=r.kgt,csp=$('c-sp');csp.textContent=kgt.toFixed(0)+' kg biomass';csp.style.color=(kgt<K.kgtLo-0.5||kgt>K.kgtHi+0.5)?'var(--text-warning)':'';$('c-sps').textContent='plant range '+K.kgtLo+' to '+K.kgtHi+' kg/t';$('c-kk').textContent=Math.round(r.kcalkg)+' kcal/kg';$('c-kks').textContent='plant range '+Math.round(K.kgtLo*K.lhvKcal/1000)+' to '+Math.round(K.kgtHi*K.lhvKcal/1000)+' kcal/kg';
+$('c-tf').textContent=Math.round(r.Tf)+' °C';$('c-tfs').textContent='plant '+K.Tf0+' ± '+K.sdF+' °C';
+$('c-tt').textContent=Math.round(r.Tt)+' °C';$('c-tts').textContent='plant '+K.Tt0+' ± '+K.sdT+' °C, dilution air '+Math.round((r.Tf-r.Tt)/(r.Tt-K.Tamb)*100)+'%';
+var lc=$('c-loi');lc.textContent=Math.round(r.loi)+'%';lc.style.color=r.loi>10?'var(--text-warning)':'var(--text-success)';
+$('c-lois').textContent=r.loi>10?'high, incomplete burnout':'in ash, normal burnout';$('c-ash').textContent=Math.round(r.ash)+'%';
+var n1,n2,n3,n4,ws=Math.round(100*(xd-85)/(615-85));
+n1='Moisture '+M.toFixed(1)+'%: heating value '+fmt(r.lh*1000/4.1868)+' kcal/kg, drying zone about '+ws+'% of the bed, water in the fuel about '+fmt(r.F*M/100)+' kg/h.';
+if(M>=20)n1+=' Very wet: low flame, low temperature and a risk of flame-out.';
+else if(M>=12)n1+=' Wetter fuel: lower heat, more fuel for the same heat, more water vapor in the flue gas, and a longer drying zone.';
+else if(M<8)n1+=' Dry fuel: fast burning and a higher peak temperature, with dust and slag risk.';
+n2='Air: lambda '+r.lam.toFixed(2)+' (target '+K.lamLo+' to '+K.lamHi+'), oxygen in the flue gas about '+r.o2.toFixed(1)+'%.';
+if(r.lam<1||r.lam>2.5)n2+=' This looks unrealistic, so please send the real blower and feed data.';
+else if(r.lam>K.lamHi)n2+=' Too much air cools the furnace and wastes fan power.';
+else if(r.lam<K.lamLo)n2+=' Too little air gives smoke and unburned carbon.';
+n3='Chain '+fc+' Hz: a faster chain burns more biomass per tonne of powder ('+r.kgt.toFixed(0)+' kg/t now, plant '+K.kgtLo+' at '+K.chLo+' Hz to '+K.kgtHi+' at '+K.chHi+' Hz) without a hotter flue gas, and leaves more unburned carbon. A slower chain is about 0.5 °C hotter per Hz.';
+n4=(bed>=24)?'Thick bed ('+bed+' cm): more fuel and more heat, but less air per kg of fuel, so more unburned carbon.':(bed<=17)?'Thin bed ('+bed+' cm): air passes easily and the bed runs cooler, with less fuel and bare spots on the grate.':'Bed thickness near the plant value (23 cm).';
+$('n1').textContent=n1;$('n2').textContent=n2;$('n3').textContent=n3;$('n4').textContent=n4;
+var st=stability(r),lab={g:'Stable',a:'Watch',r:'Unstable'};
+$('stab').innerHTML='<span class="chip '+st.lv+'">'+lab[st.lv]+'</span> Biomass use '+kgt.toFixed(0)+' kg per tonne of powder ('+Math.round(r.kcalkg)+' kcal/kg powder, plant '+K.kgtLo+' to '+K.kgtHi+' kg/t). Blowers use '+Math.round(r.Pel/(r.Pel+r.Pch)*100)+'% of the electricity ('+r.Pel.toFixed(0)+' of '+(r.Pel+r.Pch).toFixed(0)+' kW). Lambda '+r.lam.toFixed(2)+', oxygen about '+r.o2.toFixed(1)+'%. Flue gas '+Math.round(r.Tf)+' °C is '+st.z.toFixed(1)+' standard deviations from the plant average.'+(st.why.length?' Reasons: '+st.why.join('; ')+'.':'');
+var rc=recs(r),h='';rc.forEach(function(x){h+='<li>'+x[1]+'</li>';});$('rec').innerHTML=h;
+var M2=Math.max(4,M-5),fb2=Math.max(20,fb-2),fc2=Math.max(K.chLo,fc-10);
+var cs=[['Current',r],['Moisture \u22125 points (min 4%)',run(fb,fc,bed,M2,r.F*r.lh/lhv(M2))],['Blower \u22122 Hz',run(fb2,fc,bed,M)],['Chain \u221210 Hz ('+fc2+' Hz)',run(fb,fc2,bed,M)],['All three',run(fb2,fc2,bed,M2,run(fb2,fc2,bed,M).F*lhv(M)/lhv(M2))]];
+var w='';cs.forEach(function(c,i){var q=c[1];w+='<tr'+(i===0?' class="cur"':'')+'><td>'+c[0]+'</td><td>'+fmt(q.F)+'</td><td>'+Math.round(q.kcalkg)+'</td><td>'+(i===0?'\u2013':fmt((r.F-q.F)*24))+'</td><td>'+fmt(q.kwh)+'</td><td>'+(i===0?'\u2013':fmt(r.kwh-q.kwh))+'</td><td>'+Math.round(q.Tf)+' °C</td><td>'+q.lam.toFixed(2)+'</td></tr>';});
+$('wi').innerHTML=w;
+}
+function setZoom(z){z=Math.max(50,Math.min(120,z));$('zr').value=z;$('zo').textContent=z+'%';document.querySelector('.page').style.zoom=(z/90).toFixed(3);}
+$('zr').addEventListener('input',function(){setZoom(+this.value);});
+$('zm').onclick=function(){setZoom(+$('zr').value-5);};
+$('zp').onclick=function(){setZoom(+$('zr').value+5);};
+buildCal();update();
+</script>
+</body>
+</html>
